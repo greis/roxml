@@ -563,7 +563,7 @@ module ROXML # :nodoc:
             value = ref.value_in(xml)
             unless value.nil?
               if inst.respond_to?(ref.opts.setter)
-                inst.send(ref.opts.setter, value)
+                inst.send(ref.opts.setter, value) if ref.opts.call_setter?
               else
                 inst.instance_variable_set(ref.opts.instance_variable_name, value)
               end

@@ -16,11 +16,11 @@ module ROXML
 
   class Definition # :nodoc:
     attr_reader :name, :sought_type, :wrapper, :hash, :blocks, :accessor, :to_xml, :attr_name, :namespace
-    bool_attr_reader :name_explicit, :array, :cdata, :required, :frozen
+    bool_attr_reader :name_explicit, :array, :cdata, :required, :frozen, :call_setter
 
     def initialize(sym, opts = {}, &block)
       opts.assert_valid_keys(:from, :in, :as, :namespace,
-                             :else, :required, :frozen, :cdata, :to_xml)
+                             :else, :required, :frozen, :cdata, :to_xml, :call_setter)
       @default = opts.delete(:else)
       @to_xml = opts.delete(:to_xml)
       @name_explicit = opts.has_key?(:from) && opts[:from].is_a?(String)
@@ -29,6 +29,7 @@ module ROXML
       @frozen = opts.delete(:frozen)
       @wrapper = opts.delete(:in)
       @namespace = opts.delete(:namespace)
+      @call_setter = opts.delete(:call_setter) { true }
 
       @accessor = sym.to_s
       opts[:as] ||=

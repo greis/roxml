@@ -186,6 +186,33 @@ describe ROXML, "#xml" do
         book.pages.should == @expected_pages
       end
     end
+
+    describe "with :call_setter" do
+      context "set to false" do
+        class BookWithoutSetter
+          include ROXML
+
+          xml_accessor :pages, :as => Integer, :call_setter => false
+        end
+
+        it "should not apply filtering on input" do
+          book = BookWithoutSetter.from_xml(@book_with_octal_pages_xml)
+          book.pages.should == nil
+        end
+      end
+      context "set to true" do
+        class BookWithSetter
+          include ROXML
+
+          xml_accessor :pages, :as => Integer, :call_setter => true
+        end
+
+        it "should apply filtering on input" do
+          book = BookWithSetter.from_xml(@book_with_octal_pages_xml)
+          book.pages.should == @expected_pages
+        end
+      end
+    end
   end
 
   describe "attribute reference" do
