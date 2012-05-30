@@ -306,7 +306,9 @@ module ROXML
   private
     def fetch_value(xml)
       nodes_in(xml) do |node|
-        if sought_type.respond_to? :from_xml
+        if sought_type.respond_to? :from_xml_with_parent
+          sought_type.from_xml_with_parent(node, @instance)
+        elsif sought_type.respond_to? :from_xml
           sought_type.from_xml(node)
         else
           sought_type.new(node)

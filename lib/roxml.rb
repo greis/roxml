@@ -476,6 +476,10 @@ module ROXML # :nodoc:
         end
       end
 
+      def xml_initializer(&block)
+        @xml_initializer = block
+      end
+
     private
       def add_reader(attr)
         define_method(attr.accessor) do
@@ -545,16 +549,25 @@ module ROXML # :nodoc:
       # See also: xml_initialize
       #
       def from_xml(data, *initialization_args)
+        from_xml_with_parent(data, nil, *initialization_args)
+      end
+
+      def from_xml_with_parent(data, parent, *initialization_args)
         xml = XML::Node.from(data)
 
-        new(*initialization_args).tap do |inst|
+        object = @xml_initializer.nil? ? new(*initialization_args) : @xml_initializer.call(xml, parent)
+        object.tap do |inst|
           inst.roxml_references = roxml_attrs.map {|attr| attr.to_ref(inst) }
 
           inst.roxml_references.each do |ref|
             value = ref.value_in(xml)
-            inst.respond_to?(ref.opts.setter) \
-              ? inst.send(ref.opts.setter, value) \
-              : inst.instance_variable_set(ref.opts.instance_variable_name, value)
+            unless value.nil?
+              if inst.respond_to?(ref.opts.setter)
+                inst.send(ref.opts.setter, value)
+              else
+                inst.instance_variable_set(ref.opts.instance_variable_name, value)
+              end
+            end
           end
           inst.send(:after_parse) if inst.respond_to?(:after_parse, true)
         end

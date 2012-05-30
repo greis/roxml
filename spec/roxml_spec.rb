@@ -164,6 +164,28 @@ describe ROXML, "#xml" do
         book.pages.should == @expected_pages
       end
     end
+
+    describe "with #xml_initializer defined on the object" do
+      class BookWithXmlInitializer
+        include ROXML
+
+        attr_accessor :name
+        xml_initializer do |xml|
+          BookWithXmlInitializer.new.tap { |b| b.name = 'Book' }
+        end
+        xml_accessor :pages, :as => Integer, :required => true
+      end
+
+      it "should initialize the object by the block" do
+        book = BookWithXmlInitializer.from_xml(@book_with_octal_pages_xml)
+        book.name.should == 'Book'
+      end
+
+      it "should apply the mapped fields to the initialized object" do
+        book = BookWithXmlInitializer.from_xml(@book_with_octal_pages_xml)
+        book.pages.should == @expected_pages
+      end
+    end
   end
 
   describe "attribute reference" do
